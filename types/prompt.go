@@ -1,7 +1,7 @@
 package types
 
 const DiffSystemPrompt = `Please answer the following questions as a git expert`
-const DiffUserPrompt = `Please generate submission information that complies with best practice standards for the following changes.
+const DiffUserPrompt = `Please understand the changes in the following file and generate a commit message for the changes.
 file: %s
 change: %s
 `
