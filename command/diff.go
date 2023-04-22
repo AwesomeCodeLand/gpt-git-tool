@@ -23,10 +23,22 @@ func Diff() cli.Command {
 				tools.ErrorDescAndLogin("Diff", err)
 			}
 
-			for name, value := range content {
-				fmt.Println("File name: " + name)
-				fmt.Println("File content: " + value)
+			fmt.Println("---------------------------------")
+			for k, v := range content {
+				fmt.Println(k)
+				fmt.Println(v)
+				fmt.Println("---------------------------------")
 			}
+			// ai := helper.NewOpenAI(cfg.Open.Token)
+			// answer, err := ai.Diff(content)
+			// if err != nil {
+			// 	tools.ErrorDescAndLogin("Diff", err)
+			// 	os.Exit(1)
+			// }
+
+			// fmt.Println("---------------------------------")
+			// fmt.Println("")
+			// fmt.Println(answer)
 			return nil
 		},
 	}

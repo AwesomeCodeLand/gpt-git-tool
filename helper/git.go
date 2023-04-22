@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"ggt/tools"
 	"ggt/types"
-	"strings"
 
 	git "github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/format/diff"
+	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 func GetChangeFiles() (map[string]string, error) {
@@ -41,52 +40,91 @@ func getChangeFileContent(repoPath string, filter map[types.FilterType][]string)
 		return nil, err
 	}
 
+	headTree, err := commit.Tree()
+	if err != nil {
+		return nil, err
+	}
+
 	parent, err := commit.Parent(0)
 	if err != nil {
 		return nil, err
 	}
 
-	patch, err := commit.Patch(parent)
+	parentTree, err := parent.Tree()
 	if err != nil {
 		return nil, err
 	}
 
-	for _, f := range patch.FilePatches() {
-		from, to := f.Files()
+	fmt.Printf("%s --> %s", ref.Hash().String(), parent.Hash.String())
+	changes, err := object.DiffTree(parentTree, headTree)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, change := range changes {
 		name := ""
 		showDiff := false
-		if from != nil {
+		if change.From.Name != "" {
+			name = change.From.Name
 			showDiff = true
-			name = from.Path()
-		}
-
-		if !showDiff {
-			if to != nil {
-				showDiff = true
-				name = to.Path()
-			}
+		} else if change.To.Name != "" {
+			name = change.To.Name
+			showDiff = true
 		}
 
 		if showDiff &&
 			!tools.IngoreFile(name, filter) {
-			theDiffContent := ""
-			for _, c := range f.Chunks() {
-				data := strings.Split(c.Content(), "\n")
-				for _, d := range data {
-					switch c.Type() {
-					case diff.Add:
-						theDiffContent = fmt.Sprintf("%s+%s\n", theDiffContent, d)
-					case diff.Delete:
-						theDiffContent = fmt.Sprintf("%s-%s\n", theDiffContent, d)
-					case diff.Equal:
-						theDiffContent = fmt.Sprintf("%s%s\n", theDiffContent, d)
-					}
-				}
+			patch, err := change.Patch()
+			if err != nil {
+				return nil, err
 			}
-			diffContent[name] = theDiffContent
+			// fmt.Println(patch.String())
+			diffContent[name] = patch.String()
 		}
 
 	}
+
+	// patch, err := commit.Patch(parent)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// for _, f := range patch.FilePatches() {
+	// 	from, to := f.Files()
+	// 	name := ""
+	// 	showDiff := false
+	// 	if from != nil {
+	// 		showDiff = true
+	// 		name = from.Path()
+	// 	}
+
+	// 	if !showDiff {
+	// 		if to != nil {
+	// 			showDiff = true
+	// 			name = to.Path()
+	// 		}
+	// 	}
+
+	// 	if showDiff &&
+	// 		!tools.IngoreFile(name, filter) {
+	// 		theDiffContent := ""
+	// 		for _, c := range f.Chunks() {
+	// 			data := strings.Split(c.Content(), "\n")
+	// 			for _, d := range data {
+	// 				switch c.Type() {
+	// 				case diff.Add:
+	// 					theDiffContent = fmt.Sprintf("%s+%s\n", theDiffContent, d)
+	// 				case diff.Delete:
+	// 					theDiffContent = fmt.Sprintf("%s-%s\n", theDiffContent, d)
+	// 				case diff.Equal:
+	// 					theDiffContent = fmt.Sprintf("%s%s\n", theDiffContent, d)
+	// 				}
+	// 			}
+	// 		}
+	// 		diffContent[name] = theDiffContent
+	// 	}
+
+	// }
 	return diffContent, nil
 
 }

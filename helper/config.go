@@ -43,8 +43,9 @@ func SaveConfig(cf config.Cfg) error {
 		return err
 	}
 
+	os.Remove(tools.ConfigFilePath())
 	// write string to f, if f not exist, create it
-	f, err := os.OpenFile(tools.ConfigFilePath(), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(tools.ConfigFilePath(), os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
