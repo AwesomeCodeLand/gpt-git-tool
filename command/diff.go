@@ -1,10 +1,10 @@
 package command
 
 import (
+	"fmt"
 	"ggt/helper"
 	"ggt/tools"
 
-	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
 
@@ -18,14 +18,15 @@ func Diff() cli.Command {
 				tools.ErrorDescAndLogin("Diff", err)
 			}
 
-			files, err := helper.GetChangeFiles()
+			content, err := helper.GetChangeFiles()
 			if err != nil {
 				tools.ErrorDescAndLogin("Diff", err)
 			}
 
-			logrus.Infof("files: %v", files)
-
-			helper.GetChangeContentWithFile("cli/command.go")
+			for name, value := range content {
+				fmt.Println("File name: " + name)
+				fmt.Println("File content: " + value)
+			}
 			return nil
 		},
 	}

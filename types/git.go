@@ -1,24 +1,28 @@
 package types
 
 // GitIgnoreList returns a list of gitignore file
-func GitIgnoreList() map[string]bool {
-	return map[string]bool{
-		".gitignore":        true,
-		"go.mod":            true,
-		"go.sum":            true,
-		"vendor":            true,
-		"node_modules":      true,
-		"package-lock.json": true,
-		"yarn.lock":         true,
-		"package.json":      true,
+func GitIgnoreList() []string {
+	return []string{
+		".gitignore",
+		"go.mod",
+		"go.sum",
+		"vendor",
+		"node_modules",
+		"package-lock.json",
+		"yarn.lock",
+		"package.json",
 	}
 }
 
 // GitIgnoreSuffix returns a list of gitignore file suffixes
-func GitIgnoreSuffix() map[string]bool {
-
-	return map[string]bool{
-		".png": true,
-		".jpg": true,
+func GitIgnoreSuffix() []string {
+	return []string{
+		".png",
+		".jpg",
 	}
 }
+
+type FilterType int
+
+const FileNameFilter FilterType = 1
+const SuffixFilter FilterType = 2
