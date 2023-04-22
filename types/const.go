@@ -1,5 +1,12 @@
 package types
 
-const (
-	ConfigPath = "~/.ggt/config.json"
+import (
+	"fmt"
+	"os"
 )
+
+const (
+	ConfigDir  = ".ggt"
+	ConfigFile = "config.yaml"
+)
+

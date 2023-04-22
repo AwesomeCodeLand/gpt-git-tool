@@ -2,5 +2,9 @@ package config
 
 // Cfg is the global config
 type Cfg struct {
-	OpenaiToken string `json:"openai_token"`
+	Open OpenAI `yaml:"openai"`
+}
+
+type OpenAI struct {
+	Token string `yaml:"token"`
 }
