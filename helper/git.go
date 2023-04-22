@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"ggt/tools"
 	"ggt/types"
+	"io/ioutil"
 
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/kylelemons/godebug/diff"
 )
 
 func GetChangeFiles() (map[string]string, error) {
@@ -20,6 +22,7 @@ func GetChangeFiles() (map[string]string, error) {
 // value is the content of the file
 func getChangeFileContent(repoPath string, filter map[types.FilterType][]string) (diffContent map[string]string, err error) {
 
+	fmt.Println("正在获取变更文件内容...")
 	diffContent = make(map[string]string)
 
 	// Open the git repository
@@ -40,91 +43,111 @@ func getChangeFileContent(repoPath string, filter map[types.FilterType][]string)
 		return nil, err
 	}
 
-	headTree, err := commit.Tree()
+	fmt.Println("正在获取最新的文件树...")
+	latestTree, err := commit.Tree()
 	if err != nil {
 		return nil, err
 	}
 
-	parent, err := commit.Parent(0)
+	workTree, err := repo.Worktree()
 	if err != nil {
 		return nil, err
 	}
 
-	parentTree, err := parent.Tree()
+	treeStatus, err := workTree.Status()
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Printf("%s --> %s", ref.Hash().String(), parent.Hash.String())
-	changes, err := object.DiffTree(parentTree, headTree)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, change := range changes {
-		name := ""
-		showDiff := false
-		if change.From.Name != "" {
-			name = change.From.Name
-			showDiff = true
-		} else if change.To.Name != "" {
-			name = change.To.Name
-			showDiff = true
+	for filename, status := range treeStatus {
+		if status.Worktree == git.Unmodified ||
+			status.Worktree == git.Renamed ||
+			status.Worktree == git.Copied ||
+			tools.IngoreFile(filename, filter) {
+			continue
+		}
+		fmt.Printf("正在获取文件 %s 的内容... \n", filename)
+		workTreeFile, err := workTree.Filesystem.Open(filename)
+		if err != nil {
+			return nil, err
 		}
 
-		if showDiff &&
-			!tools.IngoreFile(name, filter) {
-			patch, err := change.Patch()
-			if err != nil {
-				return nil, err
+		defer workTreeFile.Close()
+
+		objectFile, err := latestTree.File(filename)
+		if err != nil {
+			if err == object.ErrFileNotFound {
+				// file was added
+				dat, err := ioutil.ReadAll(workTreeFile)
+				if err != nil {
+					return nil, err
+				}
+
+				diffContent[filename] = printDiff("", string(dat))
+				continue
 			}
-			// fmt.Println(patch.String())
-			diffContent[name] = patch.String()
+			return nil, err
+		}
+
+		objectContent, err := objectFile.Contents()
+		if err != nil {
+			return nil, err
+		}
+
+		workTreeContent, err := ioutil.ReadAll(workTreeFile)
+		if err != nil {
+			return nil, err
+		}
+
+		if string(workTreeContent) != objectContent {
+			// file was modified
+			diffContent[filename] = printDiff(string(objectContent), string(workTreeContent))
 		}
 
 	}
-
-	// patch, err := commit.Patch(parent)
+	// parent, err := commit.Parent(0)
 	// if err != nil {
 	// 	return nil, err
 	// }
 
-	// for _, f := range patch.FilePatches() {
-	// 	from, to := f.Files()
+	// parentTree, err := parent.Tree()
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// fmt.Printf("%s --> %s", ref.Hash().String(), parent.Hash.String())
+	// changes, err := object.DiffTree(parentTree, headTree)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// for _, change := range changes {
 	// 	name := ""
 	// 	showDiff := false
-	// 	if from != nil {
+	// 	if change.From.Name != "" {
+	// 		name = change.From.Name
 	// 		showDiff = true
-	// 		name = from.Path()
-	// 	}
-
-	// 	if !showDiff {
-	// 		if to != nil {
-	// 			showDiff = true
-	// 			name = to.Path()
-	// 		}
+	// 	} else if change.To.Name != "" {
+	// 		name = change.To.Name
+	// 		showDiff = true
 	// 	}
 
 	// 	if showDiff &&
 	// 		!tools.IngoreFile(name, filter) {
-	// 		theDiffContent := ""
-	// 		for _, c := range f.Chunks() {
-	// 			data := strings.Split(c.Content(), "\n")
-	// 			for _, d := range data {
-	// 				switch c.Type() {
-	// 				case diff.Add:
-	// 					theDiffContent = fmt.Sprintf("%s+%s\n", theDiffContent, d)
-	// 				case diff.Delete:
-	// 					theDiffContent = fmt.Sprintf("%s-%s\n", theDiffContent, d)
-	// 				case diff.Equal:
-	// 					theDiffContent = fmt.Sprintf("%s%s\n", theDiffContent, d)
-	// 				}
-	// 			}
+	// 		patch, err := change.Patch()
+	// 		if err != nil {
+	// 			return nil, err
 	// 		}
-	// 		diffContent[name] = theDiffContent
+	// 		// fmt.Println(patch.String())
+	// 		diffContent[name] = patch.String()
 	// 	}
 
 	// }
+
 	return diffContent, nil
 
+}
+
+func printDiff(old, new string) string {
+	return diff.Diff(old, new)
 }

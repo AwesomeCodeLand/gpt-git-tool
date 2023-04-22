@@ -9,8 +9,8 @@ func GitIgnoreList() []string {
 		"vendor",
 		"node_modules",
 		"package-lock.json",
-		"yarn.lock",
 		"package.json",
+		"yarn.lock",
 	}
 }
 
@@ -22,7 +22,17 @@ func GitIgnoreSuffix() []string {
 	}
 }
 
+// GitDirIgnoreList returns a list of gitignore dir
+func GitDirIgnoreList() []string {
+	return []string{
+		"vendor",
+		"node_modules",
+		"bin",
+	}
+}
+
 type FilterType int
 
 const FileNameFilter FilterType = 1
 const SuffixFilter FilterType = 2
+const DirFilter FilterType = 3

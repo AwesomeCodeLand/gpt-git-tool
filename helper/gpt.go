@@ -34,7 +34,7 @@ func (ai *OpenAI) Diff(diff map[string]string) (answer string, err error) {
 			return "", err
 		}
 
-		answer += _answer
+		answer = fmt.Sprintf("%s\n\t%s\n%s", answer, file, _answer)
 		fmt.Printf("[%s] 处理完成\n", file)
 		ai.CleanUserPrompt()
 	}

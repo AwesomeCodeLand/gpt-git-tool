@@ -7,7 +7,7 @@ import (
 )
 
 func ErrorDescAndLogin(preFix string, err error) {
-	logrus.Printf("%s: %v", preFix, err)
-	logrus.Println("Please Login First")
+	logrus.Errorf("%s: %v \n", preFix, err)
+	logrus.Errorln("Please Login First")
 	os.Exit(1)
 }

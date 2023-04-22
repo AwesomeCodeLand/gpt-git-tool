@@ -10,6 +10,7 @@ func GetIngoreList() map[types.FilterType][]string {
 	return map[types.FilterType][]string{
 		types.FileNameFilter: types.GitIgnoreList(),
 		types.SuffixFilter:   types.GitIgnoreSuffix(),
+		types.DirFilter:      types.GitDirIgnoreList(),
 	}
 }
 
@@ -26,6 +27,12 @@ func IngoreFile(file string, ignoreList map[types.FilterType][]string) bool {
 		case types.SuffixFilter:
 			for _, value := range filterValue {
 				if strings.HasSuffix(file, value) {
+					return true
+				}
+			}
+		case types.DirFilter:
+			for _, value := range filterValue {
+				if strings.HasPrefix(file, value) {
 					return true
 				}
 			}

@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/go-git/go-git/v5 v5.6.1
+	github.com/kylelemons/godebug v1.1.0
 	github.com/urfave/cli v1.22.12
 )
 
