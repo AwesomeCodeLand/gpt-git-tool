@@ -28,6 +28,7 @@ func GitDirIgnoreList() []string {
 		"vendor",
 		"node_modules",
 		"bin",
+		".DS_Store",
 	}
 }
 

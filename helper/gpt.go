@@ -31,7 +31,10 @@ func (ai *OpenAI) Diff(diff map[string]string) (answer string, err error) {
 		ai.WithUserPrompt(fmt.Sprintf(types.DiffUserPrompt, file, content))
 		_answer, err := ai.do(types.DiffMaxTokens)
 		if err != nil {
-			return "", err
+			return "", &types.GptError{
+				Err:  err,
+				Code: types.GptFailedError,
+			}
 		}
 
 		answer = fmt.Sprintf("%s\n\t%s\n%s", answer, file, _answer)
@@ -127,6 +130,10 @@ func (ai *OpenAI) do(maxTokens int) (answer string, err error) {
 	err = json.Unmarshal([]byte(str), &gptResponse)
 	if err != nil {
 		return "", err
+	}
+
+	if gptResponse.Error.Message != "" {
+		return "", fmt.Errorf("%v", gptResponse.Error)
 	}
 
 	return gptResponse.Choices[0].Message.Content, nil
