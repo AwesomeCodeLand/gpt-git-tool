@@ -31,10 +31,12 @@ func (ai *OpenAI) Diff(diff map[string]string) (answer string, err error) {
 		ai.WithUserPrompt(fmt.Sprintf(types.DiffUserPrompt, file, content))
 		_answer, err := ai.do(types.DiffMaxTokens)
 		if err != nil {
-			return "", &types.GptError{
-				Err:  err,
-				Code: types.GptFailedError,
+			ge, _ := err.(*types.GptError)
+			if ge.Code == types.GptContextLengthExceededError {
+				fmt.Printf("[%s] 文件内容超长, Skip!\n", file)
+				continue
 			}
+			return "", err
 		}
 
 		answer = fmt.Sprintf("%s\n\t%s\n%s", answer, file, _answer)
@@ -133,7 +135,18 @@ func (ai *OpenAI) do(maxTokens int) (answer string, err error) {
 	}
 
 	if gptResponse.Error.Message != "" {
-		return "", fmt.Errorf("%v", gptResponse.Error)
+		switch gptResponse.Error.Code {
+		case "context_length_exceeded":
+			return "", &types.GptError{
+				Err:  fmt.Errorf("%+v", gptResponse.Error),
+				Code: types.GptContextLengthExceededError,
+			}
+		default:
+			return "", &types.GptError{
+				Err:  fmt.Errorf("%+v", gptResponse.Error),
+				Code: types.GptFailedError,
+			}
+		}
 	}
 
 	return gptResponse.Choices[0].Message.Content, nil
