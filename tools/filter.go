@@ -20,7 +20,11 @@ func IngoreFile(file string, ignoreList map[types.FilterType][]string) bool {
 		switch filterType {
 		case types.FileNameFilter:
 			for _, value := range filterValue {
-				if file == value {
+				if file == value ||
+					strings.Contains(file, "/"+value) ||
+					strings.Contains(file, value+"/") ||
+					strings.Contains(file, "/"+value+"/") ||
+					strings.Contains(file, value) {
 					return true
 				}
 			}
