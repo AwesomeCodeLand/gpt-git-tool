@@ -32,7 +32,9 @@ func IngoreFile(file string, ignoreList map[types.FilterType][]string) bool {
 			}
 		case types.DirFilter:
 			for _, value := range filterValue {
-				if strings.HasPrefix(file, value) {
+				if strings.HasPrefix(file, value) ||
+					strings.Contains(file, "/"+value+"/") ||
+					strings.Contains(file, "/"+value) {
 					return true
 				}
 			}

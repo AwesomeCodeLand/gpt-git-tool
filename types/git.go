@@ -29,6 +29,8 @@ func GitDirIgnoreList() []string {
 		"node_modules",
 		"bin",
 		".DS_Store",
+		".idea",
+		".git",
 	}
 }
 
