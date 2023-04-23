@@ -1,8 +1,9 @@
 package types
 
 const (
-	GptFailedError = 1001
-	UserLoginError = 1002
+	GptFailedError                = 1001
+	GptContextLengthExceededError = 1002
+	UserLoginError                = 1003
 )
 
 // GptError is a custom error type
