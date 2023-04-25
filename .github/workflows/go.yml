@@ -39,9 +39,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         skipIfReleaseExists: true
-        tag_name: v${{ github.run_number }}-${{ github.sha }}
-        release_name: Release v${{ github.run_number }}-${{ github.sha }}
-        body: This is the release of ggt.
+        commit: main
+        tag: 'v${{ github.run_number }}'
 
     - name: Upload Release Asset
       id: upload-release-asset
