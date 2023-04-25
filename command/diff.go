@@ -16,8 +16,6 @@ func Diff() cli.Command {
 		Name:  "diff",
 		Usage: "get all the differences",
 		Action: func(c *cli.Context) error {
-			tools.Debug(c)
-
 			cfg, err := helper.GetConfig()
 			if err != nil {
 				tools.ErrorDescAndLogin("Diff", err)

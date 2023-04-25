@@ -3,6 +3,7 @@ package main
 // use urfave/cli generate command
 import (
 	cmd "ggt/command"
+	"ggt/tools"
 
 	"github.com/urfave/cli"
 )
@@ -17,6 +18,10 @@ func command() *cli.App {
 				Name:  "debug,d",
 				Usage: "output debug info",
 			},
+		},
+		Before: func(c *cli.Context) error {
+			tools.Debug(c)
+			return nil
 		},
 		Commands: []cli.Command{
 			cmd.Login(),
