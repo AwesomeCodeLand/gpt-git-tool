@@ -3,6 +3,7 @@ package command
 import (
 	"ggt/config"
 	"ggt/helper"
+	"os"
 
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -22,8 +23,10 @@ func Login() cli.Command {
 			})
 			if err != nil {
 				logrus.Errorf("login error: %v", err)
+				os.Exit(1)
 			}
 
+			logrus.Info("Login success")
 			return nil
 		},
 	}

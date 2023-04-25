@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 // OpenAI struct
@@ -33,14 +35,14 @@ func (ai *OpenAI) Diff(diff map[string]string) (answer string, err error) {
 		if err != nil {
 			ge, _ := err.(*types.GptError)
 			if ge.Code == types.GptContextLengthExceededError {
-				fmt.Printf("[%s] 文件内容超长, Skip!\n", file)
+				logrus.Warnf("[%s] 文件内容超长, Skip!\n", file)
 				continue
 			}
 			return "", err
 		}
 
-		answer = fmt.Sprintf("%s\n\t%s\n%s", answer, file, _answer)
-		fmt.Printf("[%s] 处理完成\n", file)
+		answer = fmt.Sprintf("%s\n--%s--\n%s", answer, file, _answer)
+		logrus.Infof("[%s] 处理完成\n", file)
 		ai.CleanUserPrompt()
 	}
 
@@ -72,6 +74,8 @@ func (ai *OpenAI) WithUserPrompt(prompt string) *OpenAI {
 func (ai *OpenAI) do(maxTokens int) (answer string, err error) {
 	url := ai.url
 	method := "POST"
+
+	logrus.Debugf("%+v", ai.msgs)
 
 	gptRequest := models.OpenAI{
 		Messages:        ai.msgs,
@@ -127,7 +131,7 @@ func (ai *OpenAI) do(maxTokens int) (answer string, err error) {
 	str = strings.TrimPrefix(str, "```json")
 	str = strings.TrimSuffix(str, "```")
 
-	// fmt.Println(str)
+	logrus.Debug(str)
 	var gptResponse models.OpenAIResponse
 	err = json.Unmarshal([]byte(str), &gptResponse)
 	if err != nil {

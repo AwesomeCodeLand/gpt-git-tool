@@ -7,6 +7,7 @@ import (
 	"ggt/types"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
 
@@ -14,7 +15,7 @@ func Diff() cli.Command {
 	return cli.Command{
 		Name:  "diff",
 		Usage: "get all the differences",
-		Action: func(*cli.Context) error {
+		Action: func(c *cli.Context) error {
 			cfg, err := helper.GetConfig()
 			if err != nil {
 				tools.ErrorDescAndLogin("Diff", err)
@@ -25,12 +26,7 @@ func Diff() cli.Command {
 				tools.ErrorDescAndLogin("Diff", err)
 			}
 
-			fmt.Println("---------------------------------")
-			// for k, v := range content {
-			// 	fmt.Println(k)
-			// 	fmt.Println(v)
-			// 	fmt.Println("---------------------------------")
-			// }
+			logrus.Debug("---------------------------------")
 			ai := helper.NewOpenAI(cfg.Open.Token)
 			answer, err := ai.Diff(content)
 			if err != nil {
@@ -47,9 +43,9 @@ func Diff() cli.Command {
 				}
 			}
 
-			fmt.Println("---------------------------------")
-			fmt.Println("")
-			fmt.Println(answer)
+			logrus.Debug("---------------------------------")
+			logrus.Debug("")
+			logrus.Info(answer)
 			return nil
 		},
 	}
