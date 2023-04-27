@@ -8,13 +8,17 @@ change:
 + a := 1
 - b := 2
 ]
-answer: files: <file name>
-		commit: <commit message>
+answer: 
+
+summary: <summary>
+files: <file name>
+commit: <commit message>
 
 Here is a commit message example for your reference:
 
-files: a.go
-commit: add a variable a and delete b variable
+summary: Code optimization
+files:   a.go
+commit:  add a variable a and delete b variable
 
 Please understand the changes in the following file and generate a commit message for the changes.
 
