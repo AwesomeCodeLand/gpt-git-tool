@@ -14,7 +14,16 @@ func Diff() cli.Command {
 	return cli.Command{
 		Name:  "diff",
 		Usage: "get all the differences",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "file",
+				Value: "",
+				Usage: "Specify the file to summary",
+			},
+		},
 		Action: func(c *cli.Context) error {
+			specifyFile := c.String("file")
+
 			var err error
 			defer func() {
 				if err != nil {
@@ -42,6 +51,16 @@ func Diff() cli.Command {
 			if err != nil {
 				// tools.ErrorDescAndLogin("Diff", err)
 				return err
+			}
+
+			if specifyFile != "" {
+				if _, ok := content[specifyFile]; !ok {
+					logrus.Errorf("File %s not found", specifyFile)
+					os.Exit(1)
+				}
+				content = map[string]string{
+					specifyFile: content[specifyFile],
+				}
 			}
 
 			logrus.Debug("---------------------------------")
