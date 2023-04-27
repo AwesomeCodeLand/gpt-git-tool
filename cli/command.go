@@ -26,6 +26,7 @@ func command() *cli.App {
 		Commands: []cli.Command{
 			cmd.Login(),
 			cmd.Diff(),
+			cmd.Version(),
 		},
 	}
 }
