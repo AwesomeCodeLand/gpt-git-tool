@@ -8,6 +8,6 @@ import (
 
 func ErrorDescAndLogin(preFix string, err error) {
 	logrus.Errorf("%s: %v \n", preFix, err)
-	logrus.Errorln("Please Login First")
+	// logrus.Errorln("Please Login First")
 	os.Exit(1)
 }
