@@ -9,6 +9,7 @@ import (
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/kylelemons/godebug/diff"
+	"github.com/sirupsen/logrus"
 )
 
 func GetChangeFiles() (map[string]string, error) {
@@ -66,9 +67,14 @@ func getChangeFileContent(repoPath string, filter map[types.FilterType][]string)
 			tools.IngoreFile(filename, filter) {
 			continue
 		}
-		fmt.Printf("正在获取文件 %s 的内容... \n", filename)
+		fmt.Printf("正在获取文件 %s 的内容...\n", filename)
 		workTreeFile, err := workTree.Filesystem.Open(filename)
 		if err != nil {
+			// check if the file was deleted or was not existed
+			if status.Worktree == git.Deleted || status.Worktree == git.Renamed {
+				logrus.Warnf("File %s was deleted or renamed. Skip it!", filename)
+				continue
+			}
 			return nil, err
 		}
 

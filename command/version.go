@@ -6,7 +6,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-var version string = "0.1.0"
+var version string = "0.1.1"
 var commit string
 
 func Version() cli.Command {
