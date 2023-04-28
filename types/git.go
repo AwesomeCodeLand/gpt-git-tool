@@ -19,6 +19,7 @@ func GitIgnoreSuffix() []string {
 	return []string{
 		".png",
 		".jpg",
+		".pyc",
 	}
 }
 
@@ -31,6 +32,7 @@ func GitDirIgnoreList() []string {
 		".DS_Store",
 		".idea",
 		".git",
+		"__pycache__",
 	}
 }
 
